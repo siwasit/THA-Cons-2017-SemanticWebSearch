@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from services.search_service import semantic_search_json  # import service
+from services.search_service import semantic_search_json
 
 app = Flask(__name__)
 
@@ -17,5 +17,5 @@ def api_search():
 def about():
     return render_template('about.html')
 
-if __name__ == "__main__":
-    app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=3025)
