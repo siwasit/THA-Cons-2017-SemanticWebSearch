@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THA-cons-2017-Search</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<style>
+    @keyframes fadeSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-slide-up {
+        animation: fadeSlideUp 0.3s ease-out forwards;
+    }
+</style>
+
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="container w-full mx-auto p-8">
+        <h1 class="text-4xl font-bold text-center mb-4">Welcome to THA-Constitution-2017 Search</h1>
+        <p class="text-lg mb-6 text-center">This is a Flask project with Tailwind CSS.</p>
+
+        <!-- Search Form -->
+        <div class="w-full max-w-4xl mx-auto flex flex-col items-center bg-white rounded-lg shadow p-4">
+
+            <!-- Search Form -->
+            <form id="searchForm" class="flex w-full bg-gray-100 rounded-lg overflow-hidden">
+                <input type="text" name="q" placeholder="Search..."
+                    class="flex-grow px-4 py-2 rounded-l-lg border border-gray-300 focus:outline-none">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 flex items-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 
+                      1110.5 3a7.5 7.5 0 016.15 13.65z"></path>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Results -->
+            <ul id="resultsList" class="w-full space-y-4 max-h-[400px] overflow-y-auto"></ul>
+        </div>
+    </div>
+</body>
+
+<script>
+    const resultsList = document.getElementById('resultsList');
+    const form = document.getElementById('searchForm');
+    const input = form.querySelector('input[name="q"]');
+
+    function renderResults(data) {
+        const resultsList = document.getElementById('resultsList');
+        resultsList.innerHTML = '';
+
+        if (data.length === 0) {
+            resultsList.innerHTML = '<li class="text-gray-500">No results found.</li>';
+            return;
+        }
+
+        data.forEach((section, index) => {
+            const li = document.createElement('li');
+            li.className = "bg-white p-4 rounded shadow opacity-0 animate-fade-slide-up";
+            li.style.animationDelay = `${index * 0.05}s`;
+
+            // Header
+            const headerDiv = document.createElement('div');
+            headerDiv.className = "text-sm text-gray-500";
+            if (section.header) {
+                const h = document.createElement('div');
+                h.innerText = section.header;
+                headerDiv.appendChild(h);
+            }
+            if (section.secondary_header) {
+                const sh = document.createElement('div');
+                sh.innerText = section.secondary_header;
+                headerDiv.appendChild(sh);
+            }
+            if (section.sub_header) {
+                const ssh = document.createElement('div');
+                ssh.innerText = section.sub_header;
+                headerDiv.appendChild(ssh);
+            }
+            li.appendChild(headerDiv);
+
+            // Divider
+            const divider = document.createElement('hr');
+            divider.className = "my-2 border-gray-300";
+            li.appendChild(divider);
+
+            // Content
+            const contentDiv = document.createElement('div');
+            contentDiv.className = "mt-1 text-gray-800";
+            contentDiv.innerText = section.content;
+            li.appendChild(contentDiv);
+
+            // Page info
+            const pageInfo = document.createElement('div');
+            pageInfo.className = "mt-2 text-xs text-gray-400";
+            pageInfo.innerText = `Page: ${section.page_number}`;
+            li.appendChild(pageInfo);
+
+            resultsList.appendChild(li);
+        });
+
+    }
+
+
+    // ✅ เฉพาะ submit form ถึง fetch
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault(); // ป้องกัน reload หน้า
+
+        const query = input.value.trim();
+        if (!query) {
+            resultsList.innerHTML = '';
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            renderResults(data);
+        } catch (err) {
+            console.error(err);
+        }
+    });
+</script>
+
+</html>
